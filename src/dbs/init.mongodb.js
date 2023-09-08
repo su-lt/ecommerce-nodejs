@@ -25,7 +25,7 @@ class Database {
                 console.log("Connected MongoDB Successfully");
                 countConnect();
             })
-            .catch((err) => console.log("Error Connect !!"));
+            .catch((err) => console.log("Error Connect MongoDB!!"));
     }
 
     static getInstance() {
