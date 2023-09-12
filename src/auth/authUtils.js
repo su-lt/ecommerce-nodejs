@@ -27,4 +27,8 @@ const createTokenPair = async (payload, publicKey, privateKey) => {
     }
 };
 
-module.exports = { createTokenPair };
+const verifyJWT = async (token, keySecret) => {
+    return await JWT.verify(token, keySecret);
+};
+
+module.exports = { createTokenPair, verifyJWT };

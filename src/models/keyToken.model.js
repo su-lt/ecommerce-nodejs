@@ -1,6 +1,6 @@
 "use strict";
 
-const { Schema, model } = require("mongoose"); // Erase if already required
+const { Schema, model, Types } = require("mongoose"); // Erase if already required
 
 const DOCUMENT_NAME = "Key";
 const COLLECTION_NAME = "Keys";
@@ -8,7 +8,7 @@ const COLLECTION_NAME = "Keys";
 const keyTokenSchema = new Schema(
     {
         user: {
-            type: Schema.Types.ObjectId,
+            type: Types.ObjectId,
             required: true,
             ref: "Shop",
         },
@@ -20,10 +20,11 @@ const keyTokenSchema = new Schema(
             type: String,
             required: true,
         },
-        refershToken: {
+        refreshTokensUsed: {
             type: Array,
-            default: [],
+            default: [], // refresh tokens used
         },
+        refreshToken: { type: String, required: true },
     },
     {
         collection: COLLECTION_NAME,
