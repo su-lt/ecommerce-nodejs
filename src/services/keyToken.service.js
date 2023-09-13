@@ -46,9 +46,10 @@ class KeyTokenService {
     };
 
     static findByUserId = async (userId) => {
-        const found = await keyTokenModel
-            .findOne({ user: new Types.ObjectId(userId) })
-            .lean();
+        const found = await keyTokenModel.findOne({
+            user: new Types.ObjectId(userId),
+        });
+
         return found;
     };
 
@@ -61,14 +62,12 @@ class KeyTokenService {
     };
 
     static findByRefreshTokenUsed = async (refreshToken) => {
-        console.log("ccccccc:::::", refreshToken);
         return await keyTokenModel
             .findOne({ refreshTokensUsed: refreshToken })
             .lean();
     };
 
     static findByRefreshToken = async (refreshToken) => {
-        console.log("aaaaaaabbbb:::::", refreshToken);
         return await keyTokenModel.findOne({ refreshToken });
     };
 }

@@ -17,50 +17,31 @@ const {
 } = require("../core/error.response");
 
 class AccessService {
-    static handlerRefreshToken = async (refreshToken) => {
-        // check token in token used
-        const foundToken = await KeyTokenService.findByRefreshTokenUsed(
-            refreshToken
-        );
-        // if exist
-        if (foundToken) {
-            // decode to check
-            const { userId, email } = await verifyJWT(
-                refreshToken,
-                foundToken.privateKey
-            );
-            console.log("{ userId, email }", { userId, email });
-            // remove
+    static handlerRefreshToken = async ({ refreshToken, user, keyStore }) => {
+        const { userId, email } = user;
+        // check refresh token in refresh token used
+        if (keyStore.refreshTokensUsed.includes(refreshToken)) {
+            // if exist - remove
             await KeyTokenService.removeKeyByUserId(userId);
             throw new ForbiddenError(
                 "Something wrong happened !!! Please re-login"
             );
         }
-        // if not exist - check refresh token in dbs
-        const holderToken = await KeyTokenService.findByRefreshToken(
-            refreshToken
-        );
-        if (!holderToken) throw new AuthFailureError("Shop not registered");
-
-        // verify token
-        const { userId, email } = await verifyJWT(
-            refreshToken,
-            holderToken.privateKey
-        );
-        console.log("Checkkk::::", { userId, email });
-        // check userId
+        // if not exist - check refresh token in keyStore with refresh user's token
+        if (keyStore.refreshToken !== refreshToken)
+            throw new AuthFailureError("Shop not registered"); // if different refresh token
+        // if refresh token match -  found shop
         const foundShop = await findByEmail({ email });
         if (!foundShop) throw new AuthFailureError("Shop not registered !");
-
-        // create new tokens pair
+        // create new access token and refresh token
         //  -> genarate tokens
         const tokens = await createTokenPair(
             { userId, email },
-            holderToken.publicKey,
-            holderToken.privateKey
+            keyStore.publicKey,
+            keyStore.privateKey
         );
         //  -> update new tokens pair
-        await holderToken.updateOne({
+        await keyStore.updateOne({
             $set: {
                 refreshToken: tokens.refreshToken,
             },
@@ -70,7 +51,7 @@ class AccessService {
         });
 
         return {
-            user: { userId, email },
+            user,
             tokens,
         };
     };
